@@ -21,10 +21,10 @@ cdef extern from "cellAdjust.h" nogil:
         unsigned int cellid
 
     ctypedef struct sapBgefData:
-        unsigned short genecnt;
-        unsigned int midcnt;
-        int x;
-        int y;
+        unsigned short genecnt
+        unsigned int midcnt
+        int x
+        int y
 
     ctypedef struct sapCgefData:
         unsigned int cell_count
@@ -50,6 +50,12 @@ cdef extern from "cellAdjust.h" nogil:
         void getRegionCelldata(vector[vector[int]] &m_vecpos)
         void writeToCgef(const string &outpath)
 
-        void getSapRegion(const string &strinput, int bin, int thcnt, vector[vector[int]] &vecpos, vector[sapBgefData] &vecdata)
+        void getSapRegion(const string &strinput, int bin, int thcnt, vector[vector[int]] &vecpos, vector[sapBgefData] &vecdata, float &region_area)
         void getRegionCelldataSap(vector[vector[int]] &m_vecpos)
         void getSapCellbinRegion(sapCgefData &vecdata)
+
+        void getMultiLabelInfoFromBgef(const string &strinput, vector[vector[int]] &vecpos, vector[LabelGeneData] &vecdata,
+                                       int &total_mid, int bin, int thcnt)
+        void getMultiLabelInfoFromCgef(const string &strcgef, vector[vector[int]] &m_vecpos, vector[LabelCellData] &vecdata, vector[LabelCellData] &total_data)
+        void GetPositionIndexByClusterId(const char* input_file, vector[int] cls_id,
+                                         vector[vector[int]]& clusterpos_list)

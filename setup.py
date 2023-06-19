@@ -27,11 +27,11 @@ else:
 
 setup(
     name='gefpy',
-    version='0.6.19',
+    version='0.6.24',
     description='A thin, pythonic wrapper around geftool.',
     long_description=Path('README.md').read_text('utf-8'),
     long_description_content_type="text/markdown",
-    url='https://github.com/BGIResearch/gefpy',
+    url='https://github.com/STOmics/gefpy',
     author='BGIResearch',
     author_email='huangzhibo@genomics.cn',
     python_requires='>=3.7',

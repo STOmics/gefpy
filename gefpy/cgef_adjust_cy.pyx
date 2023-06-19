@@ -77,16 +77,48 @@ cdef class CgefAdjust:
             vec.push_back(t)
 
         cdef vector[sapBgefData] vecdata
-        self.c_instance.getSapRegion(inpath, bin, thcnt, vec, vecdata)
-        return np.asarray(vecdata)
+        cdef float region_area = 0.0
+        self.c_instance.getSapRegion(inpath, bin, thcnt, vec, vecdata, region_area)
+        return np.asarray(vecdata), region_area
     
     def get_regiondata_fromcgef(self, input_path, pos):
         cdef vector[vector[int]] vec
         for t in pos:
             vec.push_back(t)
-
-        self.c_instance.getRegionCelldataSap(vec)
+        
         self.c_instance.readRawCgef(input_path)
+        self.c_instance.getRegionCelldataSap(vec)
         cdef sapCgefData vecdata
         self.c_instance.getSapCellbinRegion(vecdata)
         return np.asarray(vecdata)
+
+    def get_multilabel_regiondata_bgef(self, inpath, pos, bin=1, thcnt=4):
+        cdef vector[vector[int]] vec
+        for t in pos:
+            vec.push_back(t)
+
+        cdef vector[LabelGeneData] region_data
+        cdef int total_mid = 0
+        self.c_instance.getMultiLabelInfoFromBgef(inpath, vec, region_data, total_mid, bin, thcnt)
+        return np.asarray(region_data), total_mid
+
+    def get_multilabel_regiondata_cgef(self, inpath, pos):
+        cdef vector[vector[int]] vec
+        for t in pos:
+            vec.push_back(t)
+        
+        # self.c_instance.readRawCgef(inpath)
+        # self.c_instance.getRegionCelldataSap(vec)
+        cdef vector[LabelCellData] vecdata
+        cdef vector[LabelCellData] total_data
+        self.c_instance.getMultiLabelInfoFromCgef(inpath, vec, vecdata, total_data)
+        return np.asarray(vecdata), np.asarray(total_data)
+
+    def get_position_by_clusterid(self, inpath, clusterid):
+        cdef vector[int] vec
+        for t in clusterid:
+            vec.push_back(t)
+
+        cdef vector[vector[int]] region_data
+        self.c_instance.GetPositionIndexByClusterId(inpath, vec, region_data)
+        return np.asarray(region_data)

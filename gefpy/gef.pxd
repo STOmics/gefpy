@@ -24,7 +24,7 @@ cdef extern from "gef.h":
         unsigned short count
 
     ctypedef struct Gene:
-        char gene[32]
+        char gene[64]
         unsigned int offset
         unsigned int count
 
@@ -41,7 +41,7 @@ cdef extern from "gef.h":
         unsigned short cluster_id #  Cell type ID to index the CellTypeList
 
     ctypedef struct GeneData:
-        char gene_name[32]
+        char gene_name[64]
         unsigned int offset
         unsigned int cell_count
         unsigned int exp_count
@@ -57,3 +57,17 @@ cdef extern from "gef.h":
         int y
         unsigned short count
         unsigned int gene_id
+
+    ctypedef struct ClusterPosition:
+        int x
+        int y
+
+    ctypedef struct LabelGeneData:
+        char gene_name[64]
+        unsigned int mid_cnt
+
+    ctypedef struct LabelCellData:
+        unsigned short cluster_id
+        unsigned short mid_cnt
+        float area
+        unsigned int cell_id

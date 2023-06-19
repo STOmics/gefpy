@@ -1,5 +1,5 @@
 import sys
-from gefpy.cgef_writer_cy import generate_cgef
+from gefpy.cgef_writer_cy import generate_cgef, 
 
 def main():
     mask_file = "../test_data/FP200000617TL_B6/FP200000617TL_B6_mask.tif"
@@ -9,6 +9,11 @@ def main():
 
     # 从bGEF生成cGEF
     generate_cgef(cgef_file, bgef_file, mask_file, block_sizes)
+
+    cgem_path = ""
+    output_path = ""
+    # 从cgem生成cgef
+    cgem_to_cgef(cgem_path, output_path, block_sizes)
 
     return 0
 

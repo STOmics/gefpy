@@ -224,37 +224,57 @@ def cgef_stat(input_cgef, figpath):
     """
     b = 1
     scapath = os.path.join(figpath, "scatter_{0}x{0}_MID_gene_counts.png".format(b if b != 0 else "cell"))
-    violinpath = os.path.join(figpath, "violin_{0}x{0}_MID_gene.png".format(b if b != 0 else "cell"))
-    statisticPath = os.path.join(figpath, "statistic_{0}x{0}_MID_gene_DNB.png".format(b if b != 0 else "cell"))
+    violinpath = os.path.join(figpath, "violin_{0}x{0}_gene.png".format(b if b != 0 else "cell"))
+    violinpath1 = os.path.join(figpath, "violin_{0}x{0}_MID.png".format(b if b != 0 else "cell"))
+    statisticPath1 = os.path.join(figpath, "statistic_{0}x{0}_MID.png".format(b if b != 0 else "cell"))
+    statisticPath2 = os.path.join(figpath, "statistic_{0}x{0}_gene.png".format(b if b != 0 else "cell"))
+    statisticPath3 = os.path.join(figpath, "statistic_{0}x{0}_DNB.png".format(b if b != 0 else "cell"))
+    statisticPath4 = os.path.join(figpath, "statistic_{0}x{0}_cell_area.png".format(b if b != 0 else "cell"))
     plt.figure(figsize=(5, 5))
 
     cgef = h5py.File(input_cgef)
     df = pd.DataFrame(cgef['cellBin']['cell']['expCount', 'geneCount', 'dnbCount', 'area'])
-    df = df.rename(columns={'expCount': 'MID Count', 'geneCount': 'Gene Number', 'dnbCount': 'DNB Number', 'area': 'Cell Area'})
+    df = df.rename(columns={'expCount': 'MID Count', 'geneCount': 'Gene Type', 'dnbCount': 'DNB Number', 'area': 'Cell Area'})
     # sns.scatterplot(x=df['n_counts'], y=df['n_genes'], edgecolor="gray", color="gray")
-    plt.scatter(df['MID Count'], df['Gene Number'], color="gray", edgecolors="gray", s=0.8)
+    plt.scatter(df['MID Count'], df['Gene Type'], color="gray", edgecolors="gray", s=0.8)
     plt.grid()
     plt.xlabel("MID Count")
-    plt.ylabel("Gene Number")
+    plt.ylabel("Gene Type")
     plt.savefig(scapath, format="png", bbox_inches="tight")
 
-    plt.figure(figsize=(10, 6))
-    plt.subplot(121)
+    plt.figure(figsize=(5, 6))
+    # plt.subplot(121)
     sns.violinplot(y=df['MID Count'])
     sns.stripplot(y=df['MID Count'], jitter=0.4, color="black", size=0.8)
     plt.ylabel("")
     plt.title("MID Count")
-    plt.subplot(122)
-    sns.violinplot(y=df['Gene Number'])
-    sns.stripplot(y=df['Gene Number'], jitter=0.4, color="black", size=0.8)
+    plt.savefig(violinpath1, format="png", bbox_inches="tight")
+    # plt.subplot(122)
+    sns.violinplot(y=df['Gene Type'])
+    sns.stripplot(y=df['Gene Type'], jitter=0.4, color="black", size=0.8)
     plt.ylabel("")
-    plt.title("Gene Number")
+    plt.title("Gene Type")
     plt.savefig(violinpath, format="png", bbox_inches="tight")
 
-    g = sns.FacetGrid(pd.melt(df[['MID Count', 'Gene Number', 'DNB Number', 'Cell Area']]), col='variable', hue='variable',
+    g = sns.FacetGrid(pd.melt(df[['MID Count']]), col='variable', hue='variable',
                       sharex=False, sharey=False, height=8, palette='Set1')
-    g = (g.map(sns.distplot, "value", hist=False, rug=True))
-    plt.savefig(statisticPath)
+    g = (g.map(sns.distplot, "value", hist=False, rug=True, color="red"))
+    plt.savefig(statisticPath1)
+
+    g = sns.FacetGrid(pd.melt(df[['Gene Type']]), col='variable', hue='variable',
+                      sharex=False, sharey=False, height=8, palette='Set1')
+    g = (g.map(sns.distplot, "value", hist=False, rug=True, color="blue"))
+    plt.savefig(statisticPath2)
+
+    g = sns.FacetGrid(pd.melt(df[['DNB Number']]), col='variable', hue='variable',
+                      sharex=False, sharey=False, height=8, palette='Set1')
+    g = (g.map(sns.distplot, "value", hist=False, rug=True, color="green"))
+    plt.savefig(statisticPath3)
+
+    g = sns.FacetGrid(pd.melt(df[['Cell Area']]), col='variable', hue='variable',
+                      sharex=False, sharey=False, height=8, palette='Set1')
+    g = (g.map(sns.distplot, "value", hist=False, rug=True, color="violet"))
+    plt.savefig(statisticPath4)
 
 if __name__=='__main__':
     #a = [8,9,10,35,78,6,45,23,11,66,33,24,28,54,32, 26]
