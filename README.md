@@ -1,6 +1,3 @@
-Our GitHub repository has been transferred to https://github.com/STOmics/gefpy, please visit us for the latest update!
-
-
 gefpy
 
 ----
