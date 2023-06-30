@@ -98,7 +98,7 @@ cdef class CgefAdjust:
             vec.push_back(t)
 
         cdef vector[LabelGeneData] region_data
-        cdef int total_mid = 0
+        cdef unsigned int total_mid = 0
         self.c_instance.getMultiLabelInfoFromBgef(inpath, vec, region_data, total_mid, bin, thcnt)
         return np.asarray(region_data), total_mid
 

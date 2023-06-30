@@ -67,23 +67,23 @@ class MaskSegmentation():
         #     cv2.fillPoly(mask, np.array(i["coordinates"]), 255)
         return mask, uID_label_df
 
-    def convertMask(self):
+    def convertMask(self, label):
         """
         将二值mask，转为按细胞编号的32bit/64bit的label
         """
-        tifi.imwrite(os.path.join(self.outpath, "%s.lasso.mask.tif"%(self.sampleid)), self.maskFile)
+        tifi.imwrite(os.path.join(self.gem_path, f"{self.sampleid}.lasso.{label}.mask.tif"), self.maskFile)
         labels = self.maskFile
         return labels
 
-    def SplitProcess(self):
+    def split_process(self, bin_size, label, uID):
         if self.geneFile.endswith('.gef'):
             with h5py.File(self.geneFile, 'r') as gef_f:
-                OffsetX = gef_f['geneExp'][f'bin{self.bin_size}']['expression'].attrs['minX'][0]
-                OffsetY = gef_f['geneExp'][f'bin{self.bin_size}']['expression'].attrs['minY'][0]
-                self.header = f'#FileFormat=GEMv0.1\n#SortedBy=None\n#BinSize={self.bin_size}\n#STOmicsChip={self.sampleid}\n#OffsetX={OffsetX}\n#OffsetY={OffsetY}\n'
+                OffsetX = gef_f['geneExp'][f'bin{bin_size}']['expression'].attrs['minX'][0]
+                OffsetY = gef_f['geneExp'][f'bin{bin_size}']['expression'].attrs['minY'][0]
+                self.header = f'#FileFormat=GEMv0.1\n#SortedBy=None\n#BinSize={bin_size}\n#STOmicsChip={self.sampleid}\n#OffsetX={OffsetX}\n#OffsetY={OffsetY}\n'
 
                 # begin
-                exp = gef_f['geneExp'][f'bin{self.bin_size}']['expression']
+                exp = gef_f['geneExp'][f'bin{bin_size}']['expression']
                 totalNum = exp.shape[0]
                 batch = totalNum // 20
                 logging.info(f"batch count is {batch}")
@@ -105,21 +105,30 @@ class MaskSegmentation():
                         self.y2 = expy.max()
                     del expx, expy
                     gc.collect()
-                self.ori_shape = ( self.y2 - self.y1 + 1, self.x2 - self.x1 + 1)
-                self.maskFile, self.uID_label_df = self.readMaskFile(self.infile)
-                labels = self.convertMask()
+                self.ori_shape = (self.y2 - self.y1 + 1, self.x2 - self.x1 + 1)
+                for i in self.raw_areas:
+                    i[:, 0] = i[:, 0] - self.x1
+                    i[:, 1] = i[:, 1] - self.y1
+
+                uID_label_df = pd.DataFrame(columns=('uID', 'label'))
+                self.maskFile = np.zeros(self.ori_shape, np.uint8)
+                uID_label_df = uID_label_df.append(
+                    {'uID': uID, 'label': label}, ignore_index=True)
+                cv2.fillPoly(self.maskFile, self.raw_areas, uID)
+                # self.maskFile, self.uID_label_df = self.readMaskFile(self.infile)
+                labels = self.convertMask(label)
 
                 # get gene_id
                 geneID = []
-                for i in gef_f['geneExp'][f'bin{self.bin_size}']['gene'][()]:
+                for i in gef_f['geneExp'][f'bin{bin_size}']['gene'][()]:
                     geneID += [i[0].decode()]*i[2]
 
-                if self.uID_label_df is not None:
-                    for key in self.uID_label_df.iloc:
+                if uID_label_df is not None:
+                    for key in uID_label_df.iloc:
                         uid=key['uID']
                         label=key['label']
                         # write file header
-                        with open(os.path.join(self.outpath, f"{self.sampleid}.lasso.{label}.gem"),'w') as fg:
+                        with open(os.path.join(self.gem_path, f"{self.sampleid}.lasso.bin{bin_size}.{label}.gem"),'w') as fg:
                             fg.write(self.header)
                             # fg.write('geneID\tx\ty\tMIDCount\tExonCount\tuID\tlabel\n')
                             fg.write('geneID\tx\ty\tMIDCount\tExonCount\n')
@@ -127,7 +136,7 @@ class MaskSegmentation():
                             logging.info("dumping result..")
                             for i in range(0, totalNum, batch):
                                 endIdx = totalNum if i + batch > totalNum else i + batch
-                                self.gene_df = pd.DataFrame(gef_f['geneExp'][f'bin{self.bin_size}']['expression'][i:endIdx])
+                                self.gene_df = pd.DataFrame(gef_f['geneExp'][f'bin{bin_size}']['expression'][i:endIdx])
                                 if self.gene_df.empty:
                                     continue
                                 
@@ -135,9 +144,9 @@ class MaskSegmentation():
                                 self.gene_df['geneID'] = geneID[i:endIdx]
 
                                 # get exon
-                                if 'exon' in gef_f['geneExp'][f'bin{self.bin_size}']:
+                                if 'exon' in gef_f['geneExp'][f'bin{bin_size}']:
                                     self.has_exon_ = True
-                                    self.gene_df['ExonCount'] = gef_f['geneExp'][f'bin{self.bin_size}']['exon'][i:endIdx]
+                                    self.gene_df['ExonCount'] = gef_f['geneExp'][f'bin{bin_size}']['exon'][i:endIdx]
 
                                     # start process
                                     for row in self.gene_df.itertuples():
@@ -151,12 +160,43 @@ class MaskSegmentation():
 
                                 del self.gene_df
                                 gc.collect()
-                        os.system('gzip -f %s'%(os.path.join(self.outpath, f"{self.sampleid}.lasso.{label}.gem")))
+                        os.system('gzip -f %s'%(os.path.join(self.gem_path, f"{self.sampleid}.lasso.bin{bin_size}.{label}.gem")))
         else:
             logging.warning('Genefile is a txt, bin_size will not be used')
             typeColumn = {"geneID": 'str', "x": np.uint32, "y": np.uint32, "MIDCount": np.uint32, "UMICount": np.uint32, "MIDCount": np.uint32}
             logging.warning(self.geneFile)
             return pd.read_csv(self.geneFile, sep='\t', dtype=typeColumn)
+        
+    def saptialbin_lasso_process(self):
+        with open(self.infile, encoding='UTF-8-sig') as geofile:
+            gj = geojson.load(geofile)
+
+        for i in gj['geometries']:
+            areas = []
+            self.raw_areas = []
+            for idx in range(len(i["coordinates"])):
+                area = np.array(i["coordinates"][idx]).flatten()
+                raw_area = np.array(i["coordinates"][idx])
+                areas.append(area.astype(np.uint32))
+                self.raw_areas.append(raw_area)
+
+            uID = i["properties"]["uID"] + 1
+            if 'label' in i["properties"]:
+                label = i["properties"]['label']
+            else:
+                label = f'{uID}'
+            # areas = np.array(areas, dtype=np.int32)
+
+            os.makedirs(os.path.join(self.outpath, label), exist_ok=True)
+            tmp_outpath = os.path.join(self.outpath, f'{label}')
+            os.makedirs(os.path.join(tmp_outpath, 'segmentation'), exist_ok=True)
+            self.gem_path = os.path.join(tmp_outpath, f'segmentation')
+            gef_outpath = os.path.join(tmp_outpath, f"{self.sampleid}.{label}.label.gef")
+            cg = CgefAdjust()
+            cg.create_Region_Bgef(self.geneFile, gef_outpath, areas)
+
+            for i in str(self.bin_size).split(','):
+                self.split_process(int(i), label, uID)
 
     def run_cellMask(self):
         if self.geneFile.endswith('.gef'):
@@ -165,17 +205,21 @@ class MaskSegmentation():
                 gef_f.close()
                 with open(self.infile, encoding='UTF-8-sig') as geofile:
                     gj = geojson.load(geofile)
+                cg = CgefAdjust()
                 for i in gj['geometries']:
                     areas =[]
                     for idx in range(len(i["coordinates"])):
                         area = np.array(i["coordinates"][idx]).flatten()
-                        areas.append(area.astype(np.int))
-                self.outpath = self.outpath + f"/{self.sampleid}.lasso.cellbin.gef"
-                cg = CgefAdjust()
-                cg.create_Region_Cgef(self.geneFile, self.outpath, areas)
+                        areas.append(area.astype(np.int32))
+                    label = i["properties"]['label']
+                    os.makedirs(os.path.join(self.outpath, label), exist_ok=True)
+                    tmp_outpath = os.path.join(os.path.join(self.outpath, label), f"{self.sampleid}.{label}.label.cellbin.gef")
+                    cg.create_Region_Cgef(self.geneFile, tmp_outpath, areas)
             else:
                 gef_f.close()
-                self.SplitProcess()
+                self.saptialbin_lasso_process()
+        else:
+            logging.warning('Genefile is not gef file...')
 
 def getGefPath(file_dir):
     if os.path.exists(file_dir) and os.path.isdir(file_dir):
@@ -234,9 +278,10 @@ def main():
     binsize = opts.bin_size
     outpath = opts.outpath
     sampleid = opts.sampleid
-    os.makedirs(os.path.join(outpath, 'segmentation'), exist_ok=True)
+    # os.makedirs(os.path.join(outpath, 'segmentation'), exist_ok=True)
 
-    seg = MaskSegmentation(sampleid, infile, geneFile, os.path.join(outpath, 'segmentation'), binsize)
+    # seg = MaskSegmentation(sampleid, infile, geneFile, os.path.join(outpath, 'segmentation'), binsize)
+    seg = MaskSegmentation(sampleid, infile, geneFile, outpath, binsize)
     seg.run_cellMask()
 
 if __name__ == '__main__':
