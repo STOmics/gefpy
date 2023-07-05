@@ -60,7 +60,7 @@ class MaskSegmentation():
             else:
                 label = f'{uID}'
             uID_label_df = uID_label_df.append({'uID':uID, 'label':label}, ignore_index=True)
-            areas = np.array(areas, dtype=np.int32)
+            # areas = np.array(areas, dtype=np.int32)
             cv2.fillPoly(mask, areas, uID)
 
         # for i in gj['geometries']:
