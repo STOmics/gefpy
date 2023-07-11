@@ -27,7 +27,7 @@ else:
 
 setup(
     name='gefpy',
-    version='0.7.2',
+    version='0.7.3',
     description='A thin, pythonic wrapper around geftool.',
     long_description=Path('README.md').read_text('utf-8'),
     long_description_content_type="text/markdown",

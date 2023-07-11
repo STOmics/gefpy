@@ -24,9 +24,9 @@ def generate_cgef(cgef_file, bgef_file, mask_file, block_size: list):
     generateCgef(cgef_file, bgef_file, mask_file, &bsize[0], 0, True)
 
 
-def cgem_to_cgef(cgem_file, outpath, block_size: list):
+def cgem_to_cgef(cgem_file, outpath, block_size: list, omics="Transcriptomics"):
     cdef int[::1] bsize = np.array(block_size, dtype=np.int32)
-    cgem2cgef(cgem_file, outpath, &bsize[0], 0)
+    cgem2cgef(cgem_file, outpath, &bsize[0], 0, omics)
 
 def clusterId_to_cgef(input_file, out_file, cluster_file):
     AddClusterId4Cgef(input_file, out_file, cluster_file)

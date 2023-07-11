@@ -15,7 +15,7 @@ cdef extern from "main_cgef.h" nogil:
                      int celltype,
                      bool verbose)
 
-    int cgem2cgef(const string &strcgem, const string &strcgef, const int* block_size, int celltype)
+    int cgem2cgef(const string &strcgem, const string &strcgef, const int* block_size, int celltype, const string &omics)
 
     void AddClusterId4Cgef(const string &input_file,
                                     const string &output_file,
