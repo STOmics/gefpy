@@ -17,12 +17,13 @@ from gefpy.cgef_adjust_cy import CgefAdjust
 logging.basicConfig(format='%(asctime)s - %(name)s - %(message)s', level=logging.DEBUG)
 
 class MaskSegmentation():
-    def __init__(self, sampleid, infile, geneFile, outpath, binsize):
+    def __init__(self, sampleid, infile, geneFile, outpath, binsize, omics='Transcriptomics'):
         self.sampleid = sampleid
         self.bin_size = binsize
         self.outpath = outpath
         self.infile = infile    
         self.geneFile = geneFile
+        self.omics_type = omics
     
     def readMaskFile(self, infile):
         logging.info("Reading data..")
@@ -60,7 +61,6 @@ class MaskSegmentation():
             else:
                 label = f'{uID}'
             uID_label_df = uID_label_df.append({'uID':uID, 'label':label}, ignore_index=True)
-            # areas = np.array(areas, dtype=np.int32)
             cv2.fillPoly(mask, areas, uID)
 
         # for i in gj['geometries']:
@@ -80,7 +80,7 @@ class MaskSegmentation():
             with h5py.File(self.geneFile, 'r') as gef_f:
                 OffsetX = gef_f['geneExp'][f'bin{bin_size}']['expression'].attrs['minX'][0]
                 OffsetY = gef_f['geneExp'][f'bin{bin_size}']['expression'].attrs['minY'][0]
-                self.header = f'#FileFormat=GEMv0.1\n#SortedBy=None\n#BinSize={bin_size}\n#STOmicsChip={self.sampleid}\n#OffsetX={OffsetX}\n#OffsetY={OffsetY}\n'
+                self.header = f'#FileFormat=GEMv0.1\n#SortedBy=None\n#BinType=Bin\n#BinSize={bin_size}\n#Omics={self.omics_type}\n#Stereo-seqChip={self.sampleid}\n#OffsetX={OffsetX}\n#OffsetY={OffsetY}\n'
 
                 # begin
                 exp = gef_f['geneExp'][f'bin{bin_size}']['expression']
@@ -115,7 +115,6 @@ class MaskSegmentation():
                 uID_label_df = uID_label_df.append(
                     {'uID': uID, 'label': label}, ignore_index=True)
                 cv2.fillPoly(self.maskFile, self.raw_areas, uID)
-                # self.maskFile, self.uID_label_df = self.readMaskFile(self.infile)
                 labels = self.convertMask(label)
 
                 # get gene_id
@@ -130,7 +129,6 @@ class MaskSegmentation():
                         # write file header
                         with open(os.path.join(self.gem_path, f"{self.sampleid}.lasso.bin{bin_size}.{label}.gem"),'w') as fg:
                             fg.write(self.header)
-                            # fg.write('geneID\tx\ty\tMIDCount\tExonCount\tuID\tlabel\n')
                             fg.write('geneID\tx\ty\tMIDCount\tExonCount\n')
                             
                             logging.info("dumping result..")
@@ -151,7 +149,6 @@ class MaskSegmentation():
                                     # start process
                                     for row in self.gene_df.itertuples():
                                         if 1 == labels[int(row.y)][int(row.x)]:
-                                            # fg.write(f'{row.geneID}\t{row.x}\t{row.y}\t{row.MIDCount}\t{row.ExonCount}\t{uid}\t{label}\n')
                                             fg.write(f'{row.geneID}\t{row.x}\t{row.y}\t{row.MIDCount}\t{row.ExonCount}\n')
                                 else:
                                     for row in self.gene_df.itertuples():
@@ -185,13 +182,16 @@ class MaskSegmentation():
                 label = i["properties"]['label']
             else:
                 label = f'{uID}'
-            # areas = np.array(areas, dtype=np.int32)
 
             os.makedirs(os.path.join(self.outpath, label), exist_ok=True)
             tmp_outpath = os.path.join(self.outpath, f'{label}')
             os.makedirs(os.path.join(tmp_outpath, 'segmentation'), exist_ok=True)
             self.gem_path = os.path.join(tmp_outpath, f'segmentation')
-            gef_outpath = os.path.join(tmp_outpath, f"{self.sampleid}.{label}.label.gef")
+            gef_outpath = ''
+            if self.omics_type == 'Transcriptomics':
+                gef_outpath = os.path.join(tmp_outpath, f"{self.sampleid}.{label}.label.gef")
+            else:
+                gef_outpath = os.path.join(tmp_outpath, f"{self.sampleid}.protein.{label}.label.gef")
             cg = CgefAdjust()
             cg.create_Region_Bgef(self.geneFile, gef_outpath, areas)
 
@@ -201,6 +201,15 @@ class MaskSegmentation():
     def run_cellMask(self):
         if self.geneFile.endswith('.gef'):
             gef_f = h5py.File(self.geneFile, 'r')
+            if 'omics' in gef_f.attrs:
+                if bytes(self.omics_type, encoding = "utf8") not in gef_f.attrs['omics'].tolist():
+                    logging.error(f'-O information does not match the omics recorded in {self.geneFile}, please check input parameter or files.')
+                    return
+            else:
+                if self.omics_type != 'Transcriptomics':
+                    logging.error(f'-O information does not match the omics recorded in {self.geneFile}, please check input parameter or files.')
+                    return
+
             if 'cellBin' in gef_f:
                 gef_f.close()
                 with open(self.infile, encoding='UTF-8-sig') as geofile:
@@ -213,7 +222,11 @@ class MaskSegmentation():
                         areas.append(area.astype(np.int32))
                     label = i["properties"]['label']
                     os.makedirs(os.path.join(self.outpath, label), exist_ok=True)
-                    tmp_outpath = os.path.join(os.path.join(self.outpath, label), f"{self.sampleid}.{label}.label.cellbin.gef")
+                    tmp_outpath = ''
+                    if self.omics_type == 'Transcriptomics':
+                        tmp_outpath = os.path.join(os.path.join(self.outpath, label), f"{self.sampleid}.{label}.label.cellbin.gef")
+                    else:
+                        tmp_outpath = os.path.join(os.path.join(self.outpath, label), f"{self.sampleid}.protein.{label}.label.cellbin.gef")
                     cg.create_Region_Cgef(self.geneFile, tmp_outpath, areas)
             else:
                 gef_f.close()
@@ -223,7 +236,6 @@ class MaskSegmentation():
 
 def getGefPath(file_dir):
     if os.path.exists(file_dir) and os.path.isdir(file_dir):
-        #for i in os.listdir(file_dir):
         for root,dirs,files in os.walk(file_dir,topdown=False):
             for i in files:
                 path = os.path.join(root,i)
@@ -250,6 +262,7 @@ def main():
     parser.add_option("-m", dest="infile", help="Segmentation mask or geojson. ")
     parser.add_option("-s", dest="bin_size", type=int, default=1, help="Bin size for annotation. ")
     parser.add_option("-f", dest="flip_code", type=int,  default=0, help="Image flip code. 0 for flip vertically, 1 for flip horizontally, -1 for both.")
+    parser.add_option("-O", dest="omics", type=str,  default='Transcriptomics', help="Omics type .")
     opts, args = parser.parse_args()
 
     if not opts.geneFilePath or not opts.outpath or not opts.infile:
@@ -272,16 +285,13 @@ def main():
         logging.error("Input gene file does not exist")
         sys.exit(1)
 
-#    geneFile = os.path.join(opts.geneFilePath, 'merge_GetExp_gene.txt')
-#    geneFile = opts.geneFile
     infile = opts.infile
     binsize = opts.bin_size
     outpath = opts.outpath
     sampleid = opts.sampleid
-    # os.makedirs(os.path.join(outpath, 'segmentation'), exist_ok=True)
+    omics = opts.omics
 
-    # seg = MaskSegmentation(sampleid, infile, geneFile, os.path.join(outpath, 'segmentation'), binsize)
-    seg = MaskSegmentation(sampleid, infile, geneFile, outpath, binsize)
+    seg = MaskSegmentation(sampleid, infile, geneFile, outpath, binsize, omics)
     seg.run_cellMask()
 
 if __name__ == '__main__':
