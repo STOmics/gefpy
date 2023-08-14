@@ -21,10 +21,8 @@ cdef extern from "main_bgef.h" nogil:
                      int n_thread,
                      vector[unsigned int] bin_sizes)
 
-    void MergeProteinAndRnaMatrices(const string &protein_raw_gef,
-                                const string &rna_raw_gef,
-                                const string &protein_output_gef,
-                                const string &rna_output_gef)
+    void MergeProteinAndRnaMatrices(const string &input_gef, const string &output_gef,
+                                    const string &omics_type)
 
     void Gem2Image(const string &gem_path, const string &tif_path)
 

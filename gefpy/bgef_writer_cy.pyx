@@ -33,8 +33,8 @@ def generate_bgef(input_file, bgef_file, stromics="Transcriptomics", n_thread = 
     else:
         generateBgef(input_file, bgef_file, stromics, n_thread, bin_sizes_tmp, region)
 
-def merge_protein_rna_matrices(protein_raw_gef, rna_raw_gef, protein_output_gef, rna_output_gef):
-    MergeProteinAndRnaMatrices(protein_raw_gef, rna_raw_gef, protein_output_gef, rna_output_gef)
+def merge_protein_rna_matrices(input_gef, output_gef, omics_type):
+    MergeProteinAndRnaMatrices(input_gef, output_gef, omics_type)
 
 
     """
