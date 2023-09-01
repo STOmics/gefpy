@@ -27,7 +27,7 @@ else:
 
 setup(
     name='gefpy',
-    version='0.7.5',
+    version='0.7.6',
     description='A thin, pythonic wrapper around geftool.',
     long_description=Path('README.md').read_text('utf-8'),
     long_description_content_type="text/markdown",
@@ -37,7 +37,7 @@ setup(
     python_requires='>=3.7',
     setup_requires=['pkgconfig', 'Cython', 'numpy>=1.20.0,<1.22.0', 'setuptools_scm'],
     install_requires=[
-        "h5py <= 3.7.0",
+        "h5py >= 3.8.0",
         "numpy >= 1.20.0",
         "matplotlib",
         "seaborn",

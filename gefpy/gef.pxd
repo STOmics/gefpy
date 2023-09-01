@@ -2,7 +2,7 @@
 # distutils: language=c++
 # cython: language_level=3, boundscheck=False
 # cython: c_string_type=unicode, c_string_encoding=utf8
-
+from libcpp.string cimport string
 
 cdef extern from "gef.h":
     ctypedef union Coordinate:
@@ -71,3 +71,8 @@ cdef extern from "gef.h":
         unsigned short mid_cnt
         float area
         unsigned int cell_id
+
+    ctypedef struct MidCntFilter:
+        string gene_name
+        unsigned int min_mid
+        unsigned int max_mid

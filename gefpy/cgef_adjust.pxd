@@ -60,3 +60,5 @@ cdef extern from "cellAdjust.h" nogil:
         void getMultiLabelInfoFromCgef(const string &strcgef, vector[vector[int]] &m_vecpos, vector[LabelCellData] &vecdata, vector[LabelCellData] &total_data)
         void GetPositionIndexByClusterId(const char* input_file, vector[int] cls_id,
                                          vector[vector[int]]& clusterpos_list)
+        int GenerateFilterBgefFileByMidCount(const string &input_file, const string &output_file, int bin_size,
+                                          vector[MidCntFilter] filter_genes)

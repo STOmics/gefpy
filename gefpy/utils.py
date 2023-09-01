@@ -7,6 +7,24 @@
 import h5py
 import numpy as np
 
+def gef_is_square_bin(gef_file):
+    """
+    Determine if the file is a bgef file
+
+    :param gef_file: input the gef path
+
+    :return: the return True for bgef, False otherwise.
+    :rtype: bool
+    """
+
+    h5f = h5py.File(gef_file)
+    if 'geneExp/bin1/expression' in h5f:
+        h5f.close()
+        return True
+    else:
+        h5f.close()
+        return False
+
 def gef_is_cell_bin(gef_file):
     """
     Determine if the file is a cgef file
@@ -24,6 +42,17 @@ def gef_is_cell_bin(gef_file):
     else:
         h5f.close()
         return False
+
+def gef_contain_exon(gef_file):
+    h5f = h5py.File(gef_file)
+    if 'cellBin' in h5f: #cgef
+        if '/cellBin/cellExon' in h5f:
+            return True
+    else:
+        if '/geneExp/bin1/exon' in h5f:
+            return True
+
+    return False
 
 def StereoDataToGef(path, bin, expression, gene, attr):
     """
@@ -58,14 +87,3 @@ def StereoDataToGef(path, bin, expression, gene, attr):
     ver=[0,6,4]
     h5f.attrs.create("geftool_ver", ver, dtype=np.uint32)
     h5f.close()
-
-def gef_contain_exon(gef_file):
-    h5f = h5py.File(gef_file)
-    if 'cellBin' in h5f: #cgef
-        if '/cellBin/cellExon' in h5f:
-            return True
-    else:
-        if '/geneExp/bin1/exon' in h5f:
-            return True
-
-    return False

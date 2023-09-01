@@ -127,3 +127,14 @@ cdef class CgefAdjust:
         cdef vector[vector[int]] region_data
         self.c_instance.GetPositionIndexByClusterId(inpath, vec, region_data)
         return np.asarray(region_data)
+
+    def generate_filter_bgef_by_midcnt(self, inpath, outpath, binsize, filter_data):
+        cdef vector[MidCntFilter] filter_genes
+        cdef MidCntFilter tmp
+        for t in filter_data:
+            tmp.gene_name = str(t['Gene'])
+            tmp.max_mid = int(t['MaxFilterMID'])
+            tmp.min_mid = int(t['MinFilterMID'])
+            filter_genes.push_back(tmp)
+        ret = self.c_instance.GenerateFilterBgefFileByMidCount(inpath, outpath, binsize, filter_genes)
+        return ret
