@@ -58,3 +58,5 @@ cdef extern from "bgef_reader.h" nogil:
         void getOffset(int *data)
         void getExpAttr(int *data)
         bool isContainExon()
+        unsigned int getleveldnb(bool bfilter, bool btop, unsigned int level, unsigned int offset_x, 
+                unsigned int offset_y, unsigned int rows, unsigned int cols, void *pdnbbuf)

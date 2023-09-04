@@ -12,6 +12,7 @@ from .bgef_reader cimport *
 import numpy as np
 cimport numpy as np
 import array
+from numpy cimport ndarray, import_array, PyArray_DATA
 
 from cython cimport view
 
@@ -20,6 +21,8 @@ from cython cimport view
 #     ('y', np.uint32),
 #     ('count', np.uint32),
 # ])
+
+import_array()
 
 cdef class BgefR:
     cdef BgefReader* bgef_instance # Hold a C++ instance which we're wrapping
@@ -286,3 +289,13 @@ cdef class BgefR:
 
     def is_Contain_Exon(self):
         return self.bgef_instance.isContainExon()
+
+    def get_dnb_data(self, bfilter, btop, level, data_range):
+        cdef unsigned int cols = data_range[1] - data_range[0]
+        cdef unsigned int rows = data_range[3] - data_range[2]
+
+        dt = np.dtype([('x', '<f4'), ('y', '<f4'), ('MIDcount', '<u4'), ('genecount', '<u4'), ('color', '<f4')])
+        dnbdata = np.zeros(shape=(rows*cols,), dtype=dt)
+        cdef void* data = PyArray_DATA(dnbdata)
+        cdef unsigned int cnt = self.bgef_instance.getleveldnb(bfilter, btop, level, data_range[0], data_range[2], rows, cols, data)
+        return np.resize(dnbdata, cnt)
