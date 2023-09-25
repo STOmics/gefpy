@@ -62,3 +62,4 @@ cdef extern from "cellAdjust.h" nogil:
                                          vector[vector[int]]& clusterpos_list)
         int GenerateFilterBgefFileByMidCount(const string &input_file, const string &output_file, int bin_size,
                                           vector[MidCntFilter] filter_genes)
+        int GenerateFilterBgefDuration()

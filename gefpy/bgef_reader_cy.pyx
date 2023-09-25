@@ -294,8 +294,10 @@ cdef class BgefR:
         cdef unsigned int cols = data_range[1] - data_range[0]
         cdef unsigned int rows = data_range[3] - data_range[2]
 
+        cdef vector[unsigned long long] index
+
         dt = np.dtype([('x', '<f4'), ('y', '<f4'), ('MIDcount', '<u4'), ('genecount', '<u4'), ('color', '<f4')])
         dnbdata = np.zeros(shape=(rows*cols,), dtype=dt)
         cdef void* data = PyArray_DATA(dnbdata)
-        cdef unsigned int cnt = self.bgef_instance.getleveldnb(bfilter, btop, level, data_range[0], data_range[2], rows, cols, data)
-        return np.resize(dnbdata, cnt)
+        cdef unsigned int cnt = self.bgef_instance.getleveldnb(bfilter, btop, level, data_range[0], data_range[2], rows, cols, data, index)
+        return np.resize(dnbdata, cnt), np.asarray(index)

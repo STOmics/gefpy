@@ -138,3 +138,7 @@ cdef class CgefAdjust:
             filter_genes.push_back(tmp)
         ret = self.c_instance.GenerateFilterBgefFileByMidCount(inpath, outpath, binsize, filter_genes)
         return ret
+
+    def get_filter_bgef_process_rate(self):
+        ret = self.c_instance.GenerateFilterBgefDuration()
+        return int(ret)
