@@ -89,22 +89,26 @@ class MaskSegmentation():
                 logging.info(f"batch count is {batch}")
                 
                 # get coordination
-                self.x1, self.x2 = sys.maxsize, 0
-                self.y1, self.y2 = sys.maxsize, 0
-                for i in range(0, totalNum, batch):
-                    endIdx = totalNum if i + batch > totalNum else i + batch
-                    expx = exp['x'][i:endIdx]
-                    expy = exp['y'][i:endIdx]
-                    if expx.min() <= self.x1:
-                        self.x1 = expx.min()
-                    if expx.max() >= self.x2:
-                        self.x2 = expx.max()
-                    if expy.min() <= self.y1:
-                        self.y1 = expy.min()
-                    if expy.max() >= self.y2:
-                        self.y2 = expy.max()
-                    del expx, expy
-                    gc.collect()
+                # self.x1, self.x2 = sys.maxsize, 0
+                # self.y1, self.y2 = sys.maxsize, 0
+                # for i in range(0, totalNum, batch):
+                #     endIdx = totalNum if i + batch > totalNum else i + batch
+                #     expx = exp['x'][i:endIdx]
+                #     expy = exp['y'][i:endIdx]
+                #     if expx.min() <= self.x1:
+                #         self.x1 = expx.min()
+                #     if expx.max() >= self.x2:
+                #         self.x2 = expx.max()
+                #     if expy.min() <= self.y1:
+                #         self.y1 = expy.min()
+                #     if expy.max() >= self.y2:
+                #         self.y2 = expy.max()
+                #     del expx, expy
+                #     gc.collect()
+                self.y2 = gef_f['geneExp'][f'bin{bin_size}']['expression'].attrs['maxY'][0]
+                self.x2 = gef_f['geneExp'][f'bin{bin_size}']['expression'].attrs['maxX'][0]
+                self.y1 = OffsetY
+                self.x1 = OffsetX
                 self.ori_shape = (self.y2 - self.y1 + 1, self.x2 - self.x1 + 1)
                 for i in self.raw_areas:
                     i[:, 0] = i[:, 0] - self.x1

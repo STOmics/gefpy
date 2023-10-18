@@ -235,6 +235,9 @@ def cgef_stat(input_cgef, figpath):
     cgef = h5py.File(input_cgef)
     df = pd.DataFrame(cgef['cellBin']['cell']['expCount', 'geneCount', 'dnbCount', 'area'])
     df = df.rename(columns={'expCount': 'MID Count', 'geneCount': 'Gene Type', 'dnbCount': 'DNB Number', 'area': 'Cell Area'})
+    # write to file
+    # df.to_csv(os.path.join(figpath, "cellbin.midAndGeneCount.txt"), sep='\t',index=False, header=True)
+
     # sns.scatterplot(x=df['n_counts'], y=df['n_genes'], edgecolor="gray", color="gray")
     plt.scatter(df['MID Count'], df['Gene Type'], color="gray", edgecolors="gray", s=0.8)
     plt.grid()

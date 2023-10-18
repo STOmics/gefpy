@@ -128,7 +128,7 @@ cdef class CgefAdjust:
         self.c_instance.GetPositionIndexByClusterId(inpath, vec, region_data)
         return np.asarray(region_data)
 
-    def generate_filter_bgef_by_midcnt(self, inpath, outpath, binsize, filter_data):
+    def generate_filter_bgef_by_midcnt(self, inpath, outpath, binsize, filter_data, only_filter=False):
         cdef vector[MidCntFilter] filter_genes
         cdef MidCntFilter tmp
         for t in filter_data:
@@ -136,7 +136,7 @@ cdef class CgefAdjust:
             tmp.max_mid = int(t['MaxFilterMID'])
             tmp.min_mid = int(t['MinFilterMID'])
             filter_genes.push_back(tmp)
-        ret = self.c_instance.GenerateFilterBgefFileByMidCount(inpath, outpath, binsize, filter_genes)
+        ret = self.c_instance.GenerateFilterBgefFileByMidCount(inpath, outpath, binsize, filter_genes, only_filter)
         return ret
 
     def get_filter_bgef_process_rate(self):
