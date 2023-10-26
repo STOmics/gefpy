@@ -63,3 +63,5 @@ cdef extern from "cellAdjust.h" nogil:
         int GenerateFilterBgefFileByMidCount(const string input_file, const string output_file, int bin_size,
                                           vector[MidCntFilter] filter_genes, bool only_filter)
         int GenerateFilterBgefDuration()
+        int GenerateBgefByLasso(const string strinput, const string stroutput, vector[vector[int]] vecpos)
+        int GenerateLassoBgefDuration()

@@ -142,3 +142,14 @@ cdef class CgefAdjust:
     def get_filter_bgef_process_rate(self):
         ret = self.c_instance.GenerateFilterBgefDuration()
         return int(ret)
+
+    def generate_bgef_by_lasso(self, inpath, outpath, pos):
+        cdef vector[vector[int]] vec
+        for t in pos:
+            vec.push_back(t)
+        ret = self.c_instance.GenerateBgefByLasso(inpath, outpath, vec)
+        return ret
+
+    def get_lasso_bgef_process_rate(self):
+        ret = self.c_instance.GenerateLassoBgefDuration()
+        return int(ret)
