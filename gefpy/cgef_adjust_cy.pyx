@@ -115,7 +115,7 @@ cdef class CgefAdjust:
         # self.c_instance.readRawCgef(inpath)
         # self.c_instance.getRegionCelldataSap(vec)
         cdef vector[LabelCellData] vecdata
-        cdef vector[LabelCellData] total_data
+        cdef vector[LabelCellDataSum] total_data
         self.c_instance.getMultiLabelInfoFromCgef(inpath, vec, vecdata, total_data)
         return np.asarray(vecdata), np.asarray(total_data)
 
@@ -152,4 +152,18 @@ cdef class CgefAdjust:
 
     def get_lasso_bgef_process_rate(self):
         ret = self.c_instance.GenerateLassoBgefDuration()
+        return int(ret)
+
+    def generate_bgef_by_coordinate(self, inpath, outpath, cord, bin_size):
+        cdef vector[vector[int]] vec
+        for t in cord:
+            vec.push_back(t)
+        ret = self.c_instance.createRegionBgefByCord(inpath, outpath, vec, bin_size)
+        return int(ret)
+
+    def generate_cgef_by_coordinate(self, inpath, outpath, cord):
+        cdef vector[vector[int]] vec
+        for t in cord:
+            vec.push_back(t)
+        ret = self.c_instance.createRegionCgefByCord(inpath, outpath, vec)
         return int(ret)

@@ -60,3 +60,9 @@ cdef extern from "bgef_reader.h" nogil:
         bool isContainExon()
         unsigned int getleveldnb(bool bfilter, bool btop, unsigned int level, unsigned int offset_x, 
                 unsigned int offset_y, unsigned int rows, unsigned int cols, void *pdnbbuf, vector[unsigned long long] &index)
+
+        void GetGenesLevelDnb(bool bfilter, bool btop, unsigned int level, unsigned int start_x, unsigned int start_y,
+                                unsigned int end_x, unsigned int end_y, vector[unsigned long long] &vecindex,
+                                vector[string] genelist)
+        unsigned int getGeneDnbNum()
+        levelgenednb *getGeneDnbData()

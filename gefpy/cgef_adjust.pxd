@@ -57,7 +57,7 @@ cdef extern from "cellAdjust.h" nogil:
 
         void getMultiLabelInfoFromBgef(const string &strinput, vector[vector[int]] &vecpos, vector[LabelGeneData] &vecdata,
                                        int &total_mid, int bin, int thcnt)
-        void getMultiLabelInfoFromCgef(const string &strcgef, vector[vector[int]] &m_vecpos, vector[LabelCellData] &vecdata, vector[LabelCellData] &total_data)
+        void getMultiLabelInfoFromCgef(const string &strcgef, vector[vector[int]] &m_vecpos, vector[LabelCellData] &vecdata, vector[LabelCellDataSum] &total_data)
         void GetPositionIndexByClusterId(const char* input_file, vector[int] cls_id,
                                          vector[vector[int]]& clusterpos_list)
         int GenerateFilterBgefFileByMidCount(const string input_file, const string output_file, int bin_size,
@@ -65,3 +65,8 @@ cdef extern from "cellAdjust.h" nogil:
         int GenerateFilterBgefDuration()
         int GenerateBgefByLasso(const string strinput, const string stroutput, vector[vector[int]] vecpos)
         int GenerateLassoBgefDuration()
+
+        int createRegionBgefByCord(const string &strinput, const string &strout, vector[vector[int]] &m_vecpos,
+                               int bin_size)
+
+        int createRegionCgefByCord(const string &strinput, const string &strout, vector[vector[int]] &m_vecpos)

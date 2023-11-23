@@ -301,3 +301,26 @@ cdef class BgefR:
         cdef void* data = PyArray_DATA(dnbdata)
         cdef unsigned int cnt = self.bgef_instance.getleveldnb(bfilter, btop, level, data_range[0], data_range[2], rows, cols, data, index)
         return np.resize(dnbdata, cnt), np.asarray(index)
+
+    def get_gene_dnb_data(self, bfilter, btop, level, data_range, gene_list):
+        cdef unsigned int cols = data_range[1] - data_range[0]
+        cdef unsigned int rows = data_range[3] - data_range[2]
+
+        cdef vector[unsigned long long] index
+        # cdef vector[levelgenednb] dnbdata
+
+        self.bgef_instance.GetGenesLevelDnb(bfilter, btop, level, data_range[0], data_range[2], data_range[1], data_range[3], index, gene_list)
+        
+        data_format="""f:x:
+        f:y:
+        I:midcnt:
+        f:color:
+        """
+        cdef int lnum = self.bgef_instance.getGeneDnbNum()
+        cdef view.array dnbdata
+        if lnum != 0:
+            dnbdata = view.array((lnum,), itemsize=sizeof(levelgenednb), format=data_format, allocate_buffer=False)
+            dnbdata.data = <char*>self.bgef_instance.getGeneDnbData()
+            return np.asarray(dnbdata), np.asarray(index)
+        else:
+            return np.array([]), np.array([])

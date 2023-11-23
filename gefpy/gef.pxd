@@ -71,8 +71,22 @@ cdef extern from "gef.h":
         unsigned short mid_cnt
         float area
         unsigned int cell_id
+        int x
+        int y
+    
+    ctypedef struct LabelCellDataSum:
+        unsigned short cluster_id
+        unsigned short mid_cnt
+        float area
+        unsigned int cell_id
 
     ctypedef struct MidCntFilter:
         string gene_name
         unsigned int min_mid
         unsigned int max_mid
+    
+    ctypedef struct levelgenednb:
+        float x
+        float y
+        unsigned int midcnt
+        float color
