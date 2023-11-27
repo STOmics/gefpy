@@ -47,6 +47,12 @@ cdef class BgefR:
     def __dealloc__(self):
         del self.bgef_instance
 
+    def bgef_close(self):
+        """
+        Close the bgef.
+        """
+        self.bgef_instance.closeH5()
+
     def get_expression_num(self):
         """
         Get the number of expression.

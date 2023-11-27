@@ -13,6 +13,7 @@ from .gef cimport *
 cdef extern from "bgef_reader.h" nogil:
     cdef cppclass BgefReader:
         BgefReader(const string& filename, int bin_size, int n_thread, bool verbose) except +
+        void closeH5()
         unsigned int getGeneNum() const
         unsigned int getCellNum()
         unsigned int getExpressionNum() const
