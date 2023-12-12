@@ -42,6 +42,7 @@ cdef extern from "gef.h":
 
     ctypedef struct GeneData:
         char gene_name[64]
+        char gene_name_id[64]
         unsigned int offset
         unsigned int cell_count
         unsigned int exp_count

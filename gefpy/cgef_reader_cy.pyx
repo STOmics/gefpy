@@ -104,7 +104,8 @@ cdef class CgefR:
 
         :return: [genes]
         """
-        data_format="""32s:geneName:
+        data_format="""64s:geneID:
+        64s:geneName:
         I:offset:
         I:cellCount:
         I:expCount:

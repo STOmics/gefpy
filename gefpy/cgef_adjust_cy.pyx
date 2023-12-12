@@ -24,6 +24,9 @@ cdef class CgefAdjust:
     def __dealloc__(self):
         del self.c_instance
 
+    """
+        1. cell adjust
+    """
     def get_cell_data(self, bgef, cgef):
         """
         Get raw cell data from cgef and bgef file.
@@ -53,6 +56,9 @@ cdef class CgefAdjust:
         cdef DnbExpression [:] dnb = dnbdata
         self.c_instance.writeCellAdjust(path, outline_path, &cell[0], cell.shape[0], &dnb[0], dnb.shape[0])
 
+    """
+        2. lasso generate gef
+    """
     def create_Region_Bgef(self, inpath, outpath, pos):
         cdef vector[vector[int]] vec
         for t in pos:
@@ -71,6 +77,9 @@ cdef class CgefAdjust:
         self.c_instance.readRawCgef(inpath)
         self.c_instance.writeToCgef(outpath)
 
+    """
+        3. lasso get data
+    """
     def get_regiondata_frombgef(self, inpath, bin, thcnt, pos, isIndex = False):
         cdef vector[vector[int]] vec
         for t in pos:
@@ -97,6 +106,9 @@ cdef class CgefAdjust:
         self.c_instance.getSapCellbinRegion(vecdata)
         return np.asarray(vecdata)
 
+    """
+        4. get lasso region gene info, sort by mid
+    """
     def get_multilabel_regiondata_bgef(self, inpath, pos, bin=1, thcnt=4):
         cdef vector[vector[int]] vec
         for t in pos:
@@ -119,6 +131,9 @@ cdef class CgefAdjust:
         self.c_instance.getMultiLabelInfoFromCgef(inpath, vec, vecdata, total_data)
         return np.asarray(vecdata), np.asarray(total_data)
 
+    """
+        5. get cord by clusterid from cgef
+    """
     def get_position_by_clusterid(self, inpath, clusterid):
         cdef vector[int] vec
         for t in clusterid:
@@ -128,6 +143,9 @@ cdef class CgefAdjust:
         self.c_instance.GetPositionIndexByClusterId(inpath, vec, region_data)
         return np.asarray(region_data)
 
+    """
+        6. generate gef by filter mid, contain process rate
+    """
     def generate_filter_bgef_by_midcnt(self, inpath, outpath, binsize, filter_data, only_filter=False):
         cdef vector[MidCntFilter] filter_genes
         cdef MidCntFilter tmp
@@ -143,6 +161,9 @@ cdef class CgefAdjust:
         ret = self.c_instance.GenerateFilterBgefDuration()
         return int(ret)
 
+    """
+        7. lasso generate gef, for stereomap offline, contain process rate
+    """
     def generate_bgef_by_lasso(self, inpath, outpath, pos):
         cdef vector[vector[int]] vec
         for t in pos:
@@ -154,6 +175,9 @@ cdef class CgefAdjust:
         ret = self.c_instance.GenerateLassoBgefDuration()
         return int(ret)
 
+    """
+        8. for stereopy, generate gef by coordinate, more accurate than lasso
+    """
     def generate_bgef_by_coordinate(self, inpath, outpath, cord, bin_size):
         cdef vector[vector[int]] vec
         for t in cord:
