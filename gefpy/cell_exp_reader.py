@@ -16,6 +16,8 @@ class CellExpReader(object):
         self.count = None
         self.positions = None
         self.cluster = None
+        self.dnbCount = None
+        self.area = None
         self._init()
 
     def _init(self):
@@ -28,6 +30,8 @@ class CellExpReader(object):
             x = np.array(h5f['cellBin']['cell']['x'],  dtype='uint32')
             y = np.array(h5f['cellBin']['cell']['y'],  dtype='uint32')
             self.cluster = np.array(h5f['cellBin']['cell']['clusterID'], dtype='uint16')
+            self.dnbCount = np.array(h5f['cellBin']['cell']['dnbCount'], dtype='uint16')
+            self.area = np.array(h5f['cellBin']['cell']['area'], dtype='uint16')
 
             self.cell_num = len(x)
             self.positions = np.zeros((self.cell_num, 2))

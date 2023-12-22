@@ -70,3 +70,5 @@ cdef extern from "cellAdjust.h" nogil:
                                int bin_size)
 
         int createRegionCgefByCord(const string &strinput, const string &strout, vector[vector[int]] &m_vecpos)
+
+        void setLassoBinsize(vector[int] bin_size)

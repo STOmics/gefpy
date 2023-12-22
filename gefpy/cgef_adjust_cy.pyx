@@ -59,6 +59,12 @@ cdef class CgefAdjust:
     """
         2. lasso generate gef
     """
+    def set_lasso_binsize(self, binsize):
+        cdef vector[int] vec
+        for t in binsize:
+            vec.push_back(int(t))
+        self.c_instance.setLassoBinsize(vec)
+
     def create_Region_Bgef(self, inpath, outpath, pos):
         cdef vector[vector[int]] vec
         for t in pos:
