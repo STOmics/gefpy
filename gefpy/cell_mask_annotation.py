@@ -118,7 +118,7 @@ class MaskSegmentation():
                 self.maskFile = np.zeros(self.ori_shape, np.uint8)
                 uID_label_df = uID_label_df.append(
                     {'uID': uID, 'label': label}, ignore_index=True)
-                cv2.fillPoly(self.maskFile, self.raw_areas, uID)
+                cv2.fillPoly(self.maskFile, self.raw_areas, 1)
                 labels = self.convertMask(label)
 
                 # get gene_id
