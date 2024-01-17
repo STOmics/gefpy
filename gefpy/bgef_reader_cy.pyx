@@ -28,13 +28,15 @@ cdef class BgefR:
     cdef BgefReader* bgef_instance # Hold a C++ instance which we're wrapping
     cdef unsigned int exp_len
     cdef unsigned int gene_num
+    cdef bool get_geneid
 
-    def __cinit__(self, filepath, bin_size, n_thread):
+    def __cinit__(self, filepath, bin_size, n_thread, get_geneid=False):
         self.bgef_instance = new BgefReader(filepath, bin_size, n_thread, False)
         self.exp_len = self.bgef_instance.getExpressionNum()
         self.gene_num = self.bgef_instance.getGeneNum()
+        self.get_geneid = get_geneid
 
-    def __init__(self, filepath, bin_size, n_thread):
+    def __init__(self, filepath, bin_size, n_thread, get_geneid=False):
         """
         A class for reading common bin GEF.
 
@@ -80,7 +82,11 @@ cdef class BgefR:
         cdef vector[string] gene_names
         gene_names.reserve(self.gene_num)
         self.bgef_instance.getGeneNameList(gene_names)
-        return np.asarray(gene_names)
+        cdef vector[string] gene_ids = self.bgef_instance.getGeneIds()
+        if self.get_geneid:
+            return np.asarray(gene_names), np.asarray(gene_ids)
+        else:
+            return np.asarray(gene_names)
 
     def get_cell_names(self):
         """
@@ -111,7 +117,11 @@ cdef class BgefR:
         """
         cdef unsigned int[::1] gene_index = np.empty(self.exp_len, dtype=np.uint32)
         cdef vector[string] gene_names = self.bgef_instance.getSparseMatrixIndicesOfGene(&gene_index[0])
-        return np.asarray(gene_index), np.asarray(gene_names)
+        cdef vector[string] gene_ids = self.bgef_instance.getGeneIds()
+        if self.get_geneid:
+            return np.asarray(gene_index), np.asarray(gene_names), np.asarray(gene_ids)
+        else:
+            return np.asarray(gene_index), np.asarray(gene_names)
 
     def get_expression(self):
         """
@@ -254,9 +264,13 @@ cdef class BgefR:
         cdef vector[unsigned int] count
         cdef vector[string] gene_names
         cdef vector[unsigned long long] uniq_cell
+        cdef vector[string] gene_ids
 
-        self.bgef_instance.getfiltereddata(region, genelist, gene_names, uniq_cell, cell_ind, gene_ind, count)
-        return np.asarray(uniq_cell), np.asarray(gene_names), np.asarray(count), np.asarray(cell_ind), np.asarray(gene_ind) 
+        self.bgef_instance.getfiltereddata(region, genelist, gene_names, uniq_cell, cell_ind, gene_ind, count, gene_ids)
+        if self.get_geneid:
+            return np.asarray(uniq_cell), np.asarray(gene_names), np.asarray(count), np.asarray(cell_ind), np.asarray(gene_ind), np.asarray(gene_ids) 
+        else:
+            return np.asarray(uniq_cell), np.asarray(gene_names), np.asarray(count), np.asarray(cell_ind), np.asarray(gene_ind)
 
     def get_filtered_data_exon(self, region, genelist):
         """
@@ -269,9 +283,13 @@ cdef class BgefR:
         cdef vector[unsigned int] exon
         cdef vector[string] gene_names
         cdef vector[unsigned long long] uniq_cell
+        cdef vector[string] gene_ids
 
-        self.bgef_instance.getfiltereddata_exon(region, genelist, gene_names, uniq_cell, cell_ind, gene_ind, count, exon)
-        return np.asarray(uniq_cell), np.asarray(gene_names), np.asarray(count), np.asarray(cell_ind), np.asarray(gene_ind), np.asarray(exon)
+        self.bgef_instance.getfiltereddata_exon(region, genelist, gene_names, uniq_cell, cell_ind, gene_ind, count, exon, gene_ids)
+        if self.get_geneid:
+            return np.asarray(uniq_cell), np.asarray(gene_names), np.asarray(count), np.asarray(cell_ind), np.asarray(gene_ind), np.asarray(exon), np.asarray(gene_ids)
+        else:
+            return np.asarray(uniq_cell), np.asarray(gene_names), np.asarray(count), np.asarray(cell_ind), np.asarray(gene_ind), np.asarray(exon)
 
     def get_offset(self):
         """

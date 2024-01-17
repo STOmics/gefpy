@@ -15,11 +15,13 @@ from cython cimport view
 
 cdef class CgefR:
     cdef CgefReader* cgef_instance  # Hold a C++ instance which we're wrapping
+    cdef bool get_geneid
 
-    def __cinit__(self, filepath, verbose = False):
+    def __cinit__(self, filepath, get_geneid = False, verbose = False):
         self.cgef_instance = new CgefReader(filepath, verbose)
+        self.get_geneid = get_geneid
 
-    def __init__(self, filepath, verbose = False):
+    def __init__(self, filepath, get_geneid = False, verbose = False):
         """
         A class for reading cell bin GEF.
 
@@ -58,9 +60,16 @@ cdef class CgefR:
     #     self.cgef_instance.getGeneNameList(gene_names)
         # below is faster method
         cdef view.array gene_names = view.array((self.cgef_instance.getGeneNum(),),
-                                                itemsize=32 * sizeof(char), format='32s', allocate_buffer=True)
+                                                itemsize=64 * sizeof(char), format='64s', allocate_buffer=True)
         self.cgef_instance.getGeneNames(gene_names.data)
-        return np.asarray(gene_names)
+
+        cdef view.array gene_ids = view.array((self.cgef_instance.getGeneNum(),),
+                                                itemsize=64 * sizeof(char), format='64s', allocate_buffer=True)
+        self.cgef_instance.getGeneIds(gene_ids.data)
+        if self.get_geneid:
+            return np.asarray(gene_names), np.asarray(gene_ids)
+        else:
+            return np.asarray(gene_names)
 
     def get_cell_names(self):
         """
@@ -230,7 +239,7 @@ cdef class CgefR:
         cdef cnt = self.cgef_instance.getCellBorders(cellid, borders)
         return np.asarray(borders), cnt
 
-    def get_filtered_data(self, region, genelist, ret_area=False):
+    def get_filtered_data(self, region, genelist):
 
         cdef vector[unsigned int] cell_ind
         cdef vector[unsigned int] gene_ind
@@ -239,14 +248,15 @@ cdef class CgefR:
         cdef vector[unsigned long long] uniq_cell
         cdef vector[unsigned int] dnb_cnt
         cdef vector[unsigned int] cell_area
+        cdef vector[string] gene_ids
 
-        self.cgef_instance.getfiltereddata(region, genelist, gene_names, uniq_cell, cell_ind, gene_ind, count, dnb_cnt, cell_area)
-        if ret_area:
-            return np.asarray(uniq_cell), np.asarray(gene_names), np.asarray(count), np.asarray(cell_ind), np.asarray(gene_ind), np.asarray(dnb_cnt), np.asarray(cell_area) 
+        self.cgef_instance.getfiltereddata(region, genelist, gene_names, uniq_cell, cell_ind, gene_ind, count, dnb_cnt, cell_area, gene_ids)
+        if self.get_geneid:
+            return np.asarray(uniq_cell), np.asarray(gene_names), np.asarray(count), np.asarray(cell_ind), np.asarray(gene_ind), np.asarray(dnb_cnt), np.asarray(cell_area), np.asarray(gene_ids) 
         else:
             return np.asarray(uniq_cell), np.asarray(gene_names), np.asarray(count), np.asarray(cell_ind), np.asarray(gene_ind) 
     
-    def get_filtered_data_exon(self, region, genelist, ret_area=False):
+    def get_filtered_data_exon(self, region, genelist):
 
         cdef vector[unsigned int] cell_ind
         cdef vector[unsigned int] gene_ind
@@ -256,10 +266,11 @@ cdef class CgefR:
         cdef vector[unsigned long long] uniq_cell
         cdef vector[unsigned int] dnb_cnt
         cdef vector[unsigned int] cell_area
+        cdef vector[string] gene_ids
 
-        self.cgef_instance.getfiltereddata_exon(region, genelist, gene_names, uniq_cell, cell_ind, gene_ind, count, exon, dnb_cnt, cell_area)
-        if ret_area:
-            return np.asarray(uniq_cell), np.asarray(gene_names), np.asarray(count), np.asarray(cell_ind), np.asarray(gene_ind), np.asarray(exon), np.asarray(dnb_cnt), np.asarray(cell_area)
+        self.cgef_instance.getfiltereddata_exon(region, genelist, gene_names, uniq_cell, cell_ind, gene_ind, count, exon, dnb_cnt, cell_area, gene_ids)
+        if self.get_geneid:
+            return np.asarray(uniq_cell), np.asarray(gene_names), np.asarray(count), np.asarray(cell_ind), np.asarray(gene_ind), np.asarray(exon), np.asarray(dnb_cnt), np.asarray(cell_area), np.asarray(gene_ids)
         else:
             return np.asarray(uniq_cell), np.asarray(gene_names), np.asarray(count), np.asarray(cell_ind), np.asarray(gene_ind), np.asarray(exon)
 

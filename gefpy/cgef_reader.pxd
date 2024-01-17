@@ -17,7 +17,7 @@ cdef extern from "cgef_reader.h" nogil:
         unsigned int getExpressionNum() const;
 
         void getGeneName(char * gene_list)
-
+        void getGeneIds(char *gene_ids)
         int getGeneId(string& gene_name)
         GeneData *getGene()
         GeneData getGene(unsigned int gene_id) const
@@ -62,13 +62,13 @@ cdef extern from "cgef_reader.h" nogil:
         void getfiltereddata(vector[int] &region, vector[string] &genelist,
                     vector[string] &vec_gene, vector[unsigned long long] &uniq_cells,
                     vector[unsigned int] &cell_ind, vector[unsigned int] &gene_ind, vector[unsigned int] &count, 
-                    vector[unsigned int] &dnb_cnt, vector[unsigned int] &cell_area)
+                    vector[unsigned int] &dnb_cnt, vector[unsigned int] &cell_area, vector[string] &vec_geneids)
 
         void getfiltereddata_exon(vector[int] &region, vector[string] &genelist,
                     vector[string] &vec_gene, vector[unsigned long long] &uniq_cells,
                     vector[unsigned int] &cell_ind, vector[unsigned int] &gene_ind, 
                     vector[unsigned int] &count, vector[unsigned int] &exon, 
-                    vector[unsigned int] &dnb_cnt, vector[unsigned int] &cell_area)
+                    vector[unsigned int] &dnb_cnt, vector[unsigned int] &cell_area, vector[string] &vec_geneids)
 
         bool isContainExon()
 

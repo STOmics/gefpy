@@ -28,6 +28,7 @@ cdef extern from "bgef_reader.h" nogil:
 
         void getSparseMatrixIndicesOfExp(vector[unsigned long long] &uniq_cell, unsigned int * cell_index, unsigned int * count)
         vector[string] getSparseMatrixIndicesOfGene(unsigned int * gene_index)
+        vector[string] getGeneIds()
         void getSparseMatrixIndicesOfGene(unsigned int * gene_index, char * gene_names)
 
         int getSparseMatrixIndices(unsigned int *indices, unsigned int *indptr, unsigned int *count)
@@ -49,12 +50,12 @@ cdef extern from "bgef_reader.h" nogil:
         void getfiltereddata(vector[int] &region, vector[string] &genelist, 
                             vector[string] &gene_names, vector[unsigned long long] &uniq_cell, 
                             vector[unsigned int] &cell_ind, vector[unsigned int] &gene_ind, 
-                            vector[unsigned int] &count)
+                            vector[unsigned int] &count, vector[string] &vec_geneids)
 
         void getfiltereddata_exon(vector[int] &region, vector[string] &genelist, 
                             vector[string] &gene_names, vector[unsigned long long] &uniq_cell, 
                             vector[unsigned int] &cell_ind, vector[unsigned int] &gene_ind, 
-                            vector[unsigned int] &count, vector[unsigned int] &exon)
+                            vector[unsigned int] &count, vector[unsigned int] &exon, vector[string] &vec_geneids)
         
         void getOffset(int *data)
         void getExpAttr(int *data)
