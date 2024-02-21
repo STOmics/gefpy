@@ -24,6 +24,12 @@ from cython cimport view
 
 import_array()
 
+#define the waring string!
+OLD_FORMAT_WARNING_STRING:str = "Warning:your source data file only has gene column," \
+                        "but you specify return gene_names and gene ids which is invalid!" \
+                        "so we will return an empty array which has same size with gene_names for" \
+                        " the gene_ids"
+
 cdef class BgefR:
     cdef BgefReader* bgef_instance # Hold a C++ instance which we're wrapping
     cdef unsigned int exp_len
@@ -35,6 +41,7 @@ cdef class BgefR:
         self.exp_len = self.bgef_instance.getExpressionNum()
         self.gene_num = self.bgef_instance.getGeneNum()
         self.get_geneid = get_geneid
+        
 
     def __init__(self, filepath, bin_size, n_thread, get_geneid=False):
         """
@@ -60,6 +67,13 @@ cdef class BgefR:
         Get the number of expression.
         """
         return self.bgef_instance.getExpressionNum()
+    
+    def is_old_format(self) -> bool:
+        """
+        if true,the data is old format,missing the gene id column
+        else,contain the gene id column
+        """
+        return self.bgef_instance.isOldFormat()
 
     def get_cell_num(self):
         """
@@ -84,7 +98,11 @@ cdef class BgefR:
         self.bgef_instance.getGeneNameList(gene_names)
         cdef vector[string] gene_ids = self.bgef_instance.getGeneIds()
         if self.get_geneid:
-            return np.asarray(gene_names), np.asarray(gene_ids)
+            if not self.is_old_format():
+                return np.asarray(gene_names), np.asarray(gene_ids)
+            else:
+                print(OLD_FORMAT_WARNING_STRING)
+                return np.asarray(gene_names),np.zeros(self.gene_num,dtype="<U1")
         else:
             return np.asarray(gene_names)
 
@@ -119,7 +137,11 @@ cdef class BgefR:
         cdef vector[string] gene_names = self.bgef_instance.getSparseMatrixIndicesOfGene(&gene_index[0])
         cdef vector[string] gene_ids = self.bgef_instance.getGeneIds()
         if self.get_geneid:
-            return np.asarray(gene_index), np.asarray(gene_names), np.asarray(gene_ids)
+            if not self.is_old_format():
+                return np.asarray(gene_index), np.asarray(gene_names), np.asarray(gene_ids)
+            else:
+                print(OLD_FORMAT_WARNING_STRING)
+                return np.asarray(gene_index),np.asarray(gene_names),np.zeros(self.gene_num,dtype="<U1")
         else:
             return np.asarray(gene_index), np.asarray(gene_names)
 
@@ -268,7 +290,11 @@ cdef class BgefR:
 
         self.bgef_instance.getfiltereddata(region, genelist, gene_names, uniq_cell, cell_ind, gene_ind, count, gene_ids)
         if self.get_geneid:
-            return np.asarray(uniq_cell), np.asarray(gene_names), np.asarray(count), np.asarray(cell_ind), np.asarray(gene_ind), np.asarray(gene_ids) 
+            if not self.is_old_format():
+                return np.asarray(uniq_cell), np.asarray(gene_names), np.asarray(count), np.asarray(cell_ind), np.asarray(gene_ind), np.asarray(gene_ids)
+            else:
+                print(OLD_FORMAT_WARNING_STRING)
+                return np.asarray(uniq_cell), np.asarray(gene_names), np.asarray(count), np.asarray(cell_ind), np.asarray(gene_ind),np.zeros(self.gene_num,dtype="<U1")
         else:
             return np.asarray(uniq_cell), np.asarray(gene_names), np.asarray(count), np.asarray(cell_ind), np.asarray(gene_ind)
 
@@ -287,7 +313,11 @@ cdef class BgefR:
 
         self.bgef_instance.getfiltereddata_exon(region, genelist, gene_names, uniq_cell, cell_ind, gene_ind, count, exon, gene_ids)
         if self.get_geneid:
-            return np.asarray(uniq_cell), np.asarray(gene_names), np.asarray(count), np.asarray(cell_ind), np.asarray(gene_ind), np.asarray(exon), np.asarray(gene_ids)
+            if not self.is_old_format():
+                return np.asarray(uniq_cell), np.asarray(gene_names), np.asarray(count), np.asarray(cell_ind), np.asarray(gene_ind), np.asarray(exon), np.asarray(gene_ids)
+            else:
+                print(OLD_FORMAT_WARNING_STRING)
+                return np.asarray(uniq_cell), np.asarray(gene_names), np.asarray(count), np.asarray(cell_ind), np.asarray(gene_ind), np.asarray(exon), np.zeros(self.gene_num,dtype="<U1")
         else:
             return np.asarray(uniq_cell), np.asarray(gene_names), np.asarray(count), np.asarray(cell_ind), np.asarray(gene_ind), np.asarray(exon)
 

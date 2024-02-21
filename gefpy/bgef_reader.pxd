@@ -17,6 +17,7 @@ cdef extern from "bgef_reader.h" nogil:
         unsigned int getGeneNum() const
         unsigned int getCellNum()
         unsigned int getExpressionNum() const
+        bool isOldFormat() const 
 
         Expression * getExpression()
 
