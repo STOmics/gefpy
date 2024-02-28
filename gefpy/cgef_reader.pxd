@@ -30,10 +30,10 @@ cdef extern from "cgef_reader.h" nogil:
 
         int getSparseMatrixIndices(unsigned int * indices,
                                    unsigned int * indptr,
-                                   unsigned int * count,
+                                   unsigned short * count,
                                    const char * order)
 
-        int getSparseMatrixIndices2(unsigned int * cell_ind, unsigned int * gene_ind, unsigned int * count)
+        int getSparseMatrixIndices2(unsigned int * cell_ind, unsigned int * gene_ind, unsigned short * count)
 
         void restrictRegion(unsigned int min_x, unsigned int max_x, unsigned int min_y, unsigned int max_y)
 

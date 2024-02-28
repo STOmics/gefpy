@@ -142,7 +142,7 @@ cdef class CgefR:
         indptr_len = self.cgef_instance.getGeneNum() + 1 if order == 'gene' else self.cgef_instance.getCellNum() + 1
         cdef unsigned int[::1] indices = np.empty(self.cgef_instance.getExpressionNum(), dtype=np.uint32)
         cdef unsigned int[::1] indptr = np.empty(indptr_len, dtype=np.uint32)
-        cdef unsigned int[::1] count = np.empty(self.cgef_instance.getExpressionNum(), dtype=np.uint32)
+        cdef unsigned short[::1] count = np.empty(self.cgef_instance.getExpressionNum(), dtype=np.uint16)
         self.cgef_instance.getSparseMatrixIndices(&indices[0], &indptr[0], &count[0], order)
         return np.asarray(indices), np.asarray(indptr), np.asarray(count)
 
@@ -162,7 +162,7 @@ cdef class CgefR:
         """
         cdef unsigned int[::1] cell_ind = np.empty(self.cgef_instance.getExpressionNum(), dtype=np.uint32)
         cdef unsigned int[::1] gene_ind = np.empty(self.cgef_instance.getExpressionNum(), dtype=np.uint32)
-        cdef unsigned int[::1] count = np.empty(self.cgef_instance.getExpressionNum(), dtype=np.uint32)
+        cdef unsigned short[::1] count = np.empty(self.cgef_instance.getExpressionNum(), dtype=np.uint16)
         self.cgef_instance.getSparseMatrixIndices2(&cell_ind[0], &gene_ind[0], &count[0])
         return np.asarray(cell_ind), np.asarray(gene_ind), np.asarray(count)
 
